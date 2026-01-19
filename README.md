@@ -22,32 +22,39 @@ x = x + self.residual_scaling * self.mlp(self.ln_2(x))
 Second code block
 ```
 ### Begin CompleteP code ###
-adam_eps *= (1 / self.config.mup_width_multiplier) * (self.config.depth_multiplier ** (-1 * self.config.depth_alpha_exp))
+# January 19 2025: Fixed bug found by (https://www.arxiv.org/abs/2512.22382) where we didn't implement separate adam_eps scaling for hidden and "emb. & unemb." layers based on Equation 40 in our paper.
+emb_unemb_adam_eps = adam_eps * (1 / self.config.mup_width_multiplier)
+hidden_adam_eps = adam_eps * (1 / self.config.mup_width_multiplier) * (self.config.depth_multiplier ** (-1 * self.config.depth_alpha_exp))
 optim_groups = [
     {
         'params': emb_params,
         'weight_decay': weight_decay,
         'lr_scale': 1.0,
+        'eps': emb_unemb_adam_eps,
     },
     {
         'params': hidden_ln_params,
         'weight_decay': 0.0,
         'lr_scale': depth_lr_scaling,
+        'eps': hidden_adam_eps,
     },
     {
         'params': hidden_weight_params,
         'weight_decay': weight_decay / width_lr_scaling,
         'lr_scale': width_lr_scaling * depth_lr_scaling,
+        'eps': hidden_adam_eps,
     },
     {
         'params': hidden_bias_params,
         'weight_decay': 0.0,
         'lr_scale': depth_lr_scaling,
+        'eps': hidden_adam_eps,
     },
     {
         'params': final_ln_params,
         'weight_decay': 0.0,
         'lr_scale': 1.0,
+        'eps': emb_unemb_adam_eps,
     },
 ]
 ### End CompleteP code ###
