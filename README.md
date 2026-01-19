@@ -60,8 +60,6 @@ optim_groups = [
 ### End CompleteP code ###
 ```
 
-Note that when `self.config.depth_alpha_exp = 1`, only the first code block is required, hence CompleteP (alpha=1) only requires 2 lines of code in addition to muP!
-
 ### Experiment reproduction
 The `completep_examples`` folder contains code to reproduce the relative distance from linearization (Figure 6 from the paper)
 
